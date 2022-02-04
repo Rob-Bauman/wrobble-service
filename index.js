@@ -14,13 +14,22 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 const Pool = require('pg').Pool
-const pool = new Pool({
-  user: process.env.dbuser,
-  host: process.env.dbhost,
-  database: process.env.dbname,
-  password: process.env.dbpw,
-  port: process.env.dbport,
-})
+
+let dbConfig
+if (process.env.NODE_ENV === "production") {
+    dbConfig = {
+        DATABASE_URL: process.env.DATABASE_URL
+    }
+} else {
+    dbConfig = {
+        user: process.env.dbuser,
+        host: process.env.dbhost,
+        database: process.env.dbname,
+        password: process.env.dbpw,
+        port: process.env.dbport,
+    }
+}
+const pool = new Pool(dbConfig)
 
 const getDailyWord = (date) => {
     return pool.query("SELECT * FROM daily_words WHERE date = $1", [date], (error, results) => {
@@ -101,12 +110,7 @@ app.post('/checkWord', function (req, res) {
     }
 })
 
-let port = process.env.PORT;
-if (port == null || port == "") {
-  port = 8081;
-}
-
-const server = app.listen(port, function () {
+const server = app.listen(process.env.PORT || 8081, function () {
     const host = server.address().address
     const port = server.address().port
     console.log("Example app listening at http://%s:%s", host, port)
