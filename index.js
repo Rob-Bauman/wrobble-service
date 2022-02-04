@@ -15,21 +15,37 @@ app.use(bodyParser.json())
 
 const Pool = require('pg').Pool
 
-let dbConfig
-if (process.env.NODE_ENV === "production") {
-    dbConfig = {
-        DATABASE_URL: process.env.DATABASE_URL
-    }
-} else {
-    dbConfig = {
-        user: process.env.dbuser,
-        host: process.env.dbhost,
-        database: process.env.dbname,
-        password: process.env.dbpw,
-        port: process.env.dbport,
-    }
+let connectionString = {
+    user: process.env.dbuser,
+    password: process.env.dbpw,
+    database: process.env.dbname,
+    host: process.env.dbhost
+};
+// checking to know the environment and suitable connection string to use
+if (process.env === 'production') {
+    connectionString = {
+        connectionString: process.env.DATABASE_URL,
+        ssl: true
+    };
 }
-const pool = new Pool(dbConfig)
+
+const pool = new Pool(connectionString)
+
+// let dbConfig
+// if (process.env.NODE_ENV === "production") {
+//     dbConfig = {
+//         DATABASE_URL: process.env.DATABASE_URL
+//     }
+// } else {
+//     dbConfig = {
+//         user: process.env.dbuser,
+//         host: process.env.dbhost,
+//         database: process.env.dbname,
+//         password: process.env.dbpw,
+//         port: process.env.dbport,
+//     }
+// }
+// const pool = new Pool(dbConfig)
 
 const getDailyWord = (date) => {
     return pool.query("SELECT * FROM daily_words WHERE date = $1", [date], (error, results) => {
