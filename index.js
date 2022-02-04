@@ -22,7 +22,7 @@ let connectionString = {
     host: process.env.dbhost
 };
 // checking to know the environment and suitable connection string to use
-if (process.env === 'production') {
+if (process.env.NODE_ENV === 'production') {
     connectionString = {
         connectionString: process.env.DATABASE_URL,
         ssl: true
